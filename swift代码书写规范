@@ -1,0 +1,304 @@
+
+Swift代码书写规范指导
+
+1 命名
+使用驼峰式给类，方法或者变量等。类命名必须大写，然后方法名和变量应该以小写字母开始。
+eg 首选的
+private let maximumWidgetCount = 100
+class WidgetContainer {
+ var widgetButton:UIButton?
+let widgetHeightPercentage = 0.85
+}
+
+
+
+以下的方式是非首选的
+let MAX_WIDGET_COUNT = 100
+class app_widgetContainer {
+var wBut:UIButton?
+let wHeightPct = 0.85
+}
+对于函数和初始化方法，除非上下文比较明朗，对所有参数命名。包括外部参数名如果它使得函数调用更加可读
+swift
+func dateFromString(dateString:String)->NSDate
+func convertPointAt(column column:Int.row:Int) ->CGPoint
+func timedAction(afterDelay delay:NSTimeInterval,perform action:SKAction)->SKAction
+应该这样调用
+dateFromString(“2016-03-29”)
+convertPointAt(column:7,row:13)
+timedAction(afterDelay:1.0,perform:someOtherAction)
+对于方法，遵循标准的苹果会话指的是第一个参数的方法名称:
+swift
+class Counter {
+func combineWith(otherCounter:Counter,options:Dictionary?) {…}
+func incrementBy(amount:Int) {….}
+}
+#enumerations枚举
+使用大写的驼峰式命名定义枚举值
+enum Shape {
+case Rectangle
+case Square
+case Triangle
+case Circle
+}
+#单调prose
+指函数散文(教程、书籍、评论)包括从调用者的角度或“_”未命名参数的要求的参数名称
+。
+调用 “convertPointAt“通过你自己的初始化实现
+如果你调用 dateFromString()_:必须确认你提供了一个带有“yyyy-MM-dd”的字符串
+如果你通过ViewDidLoad（）去调用timedAction（afterDelay:perform:）记得添加一个调整过的延迟值和一个执行的动作
+你不应该直接调用数据源方法-tableView（_:cellForRowAtIndexPath:）
+#类前缀
+swift类型是由模块自动名称空间,其中包含它们,你不应该添加一个类前缀。如果两个名字来自不同模块碰撞可以通过加前缀消除歧义类型名称和模块名称。为什么加类前缀呢，就是为了消除多个模型的歧义这样编译器处理时好做区分。
+#import SomeModules
+let myClass = MyModule.UsefulClass()
+#spacing间隔
+
+缩进使用2个空间而不是保护空间和防止线包装标签。一定要设置这个偏好在Xcode和项目设置如下所示:
+方法间隔和其他间隔总是在向同一行作为陈述句打开，但是在新的一行关闭
+建议：你能预间隔通过选择一些代码例如 comman+A是选择所有然后control +i。Xcode模板中的一些有四个间隔tab的硬编码因此这是一个好的办法去修正它。
+#首选的
+if user.isHappy {
+//Do something
+}else {
+//Do something else
+}
+#非首选的格式
+if user.isHappy
+{
+//Do something
+}
+else {
+//Do something else
+}
+方法之间应该有一个空行方法帮助视觉清晰度和组织。空格内方法应该单独的功能,但太多的部分在一个方法中通常意味着你应该重构为几个方法。
+##comments注释
+当它们是必须的，用注释去解释**why**代码的一个详细块做一些事情。注释应该保持最新或被删除
+用。避免注释内联代码块,因为代码应尽可能自我文档。*例外:这并不适用于这些注释用于生成文档。*
+##类和结构
+使用哪个，记住，结构体是值类型，对于一些事使用结构体（没有一个特性）。一个数组包含a,b,c,和其他包含a，b，c的数组是一样的，它们是完全可交换的。你是否用第一个数组或是第二个完全没有关系，因为你代表的是准确的同一件事，这就是为什么数组是结构体
+类属于引用类型，用类来声明一些事情有一个特性或一个特殊的生命周期。你用一个类建模一个人因为二个人的对象是二个不同的事情，仅仅因为二个人有相同的名字和生日，这并不意味它们是同一个人。但是人的生日能是一个结构体因为日期和另外一个日期是相同的，日期本身没有一个同一性。
+有时候，事情是结构体但是必须遵从AnyObject 或以往已经用类来建模，试着尽可能紧密地遵从这些指引。
+以下是一个例子-风格较好的类定义
+class Circle:Shape {
+var x:Int,y:Int
+var radius:Double
+var diameter:Double {
+get {
+return radius * 2
+}
+set {
+radius = newValue /2
+}
+}
+init(x:Int,y:Int,radius:Double) {
+self.x = x
+self.y = y
+self.radius = radius
+}
+convenience init(x:Int,y:Int,diameter:Double) {
+self.init(x:x,y:y,radius:diameter/2)
+}
+func describle() ->String {
+return “I’m a circle at\(centerString()) with an area of\(computeArea())”
+}
+override func computerArea() ->Double {
+return M_PI * radius * radius
+}
+override func centerString() ->String {
+return “\(x),\(y)”
+}
+以上展示的例子-遵从下面的风格指导
+1，加匹配类型给属性，变量，常量，声明参数和用括号的陈述句 例如：x：Int
+2，如果它们分享一个共同的目的或上下文，在单行上定义多个变量和结构
+3，缩排getter和setter定义和属性观察
+4，不要增加修饰语例如 internal-当它们已经是默认的。简单来说，当重写一个方法时不要重复存取修饰符
+#self的使用
+简洁来说，自从swift不要求它去存取一个对象的属性或调用它的方法，消除了使用self。
+当初始化器中区分属性名称和参数时，用self。当在一个闭包表达式中引用一个属性时，如果使用self容易造成循环引用进而会内存泄露
+Eg
+class BoradLocation {
+let row:Int,column:Int
+init(row:Int,column:Int) {
+self.row = row
+self.column = column
+let closure  = {
+print(self.row)
+}
+}
+}
+
+#协议一致性
+当增加协议的一致性给类时，最好增加一个独立的类扩展给协议方法。这将保持相关的方法用协议分组，兵器简化指令去增加一个协议给一个有它相关方法的类。
+不要忘记//MARK:-去注释保持事情更有组织
+-首选的
+class MyViewController:UIViewController {
+//class stuff here
+}
+//MARK:-UITableViewDataSource
+extension MyViewController:UITableViewDataSource {
+//table view data source methods
+
+}
+//MARK:- UIScrollViewDelegate {
+extension MyViewController:UIScrollViewDelegate {
+//scroll view delegate methods here
+}
+-不推荐的
+Class MyViewController:UIViewController,UITableViewDataSource,UIScrollViewDelegate {
+//all methods
+}
+#计算属性
+简洁说来，如果一个计算属性是只读的，省略get子句，当一个set子句是提供的，get子句仅仅是要求
+eg，最佳选择
+ var diameter:Double {
+return radius * 2
+}
+非最佳的写法
+var  diameter:Double {
+get {
+return radius * 2
+}
+}
+##函数声明
+包含一个开括号在一行内定义一个短函数
+fun  reticulateSplines(spline:[Double]) ->Bool {
+}
+对于带有长署名的函数而言，在适当的点中断 然后在下一行增加一个特别的缩排
+
+func reticulateSplines(spline: [Double], adjustmentFactor: Double,
+    translateConstant: Int, comment: String) -> Bool {
+  // reticulate code goes here
+}
+
+
+#闭包表达式
+如果在参数列表的皆为有一个单独的闭包表达式参数，使用拖尾闭包，给闭包参数叙述性的名字
+eg-最佳书写规范
+UIView,animateWithDuration(1.0) {
+self.myView.alpha = 0 
+}
+UIView.animateWithDuration(1.0,animations: {
+self.myView.alpha = 0
+},
+completion: { finished in self,myView.removeFromSuperView()
+}
+)
+-非首选的书写规范
+UIView.animateWithDuration(1.0,animations: {
+self.myView.alpha = 0
+})
+UIView.animateWithDuration(1.0,
+animations:{
+self,myView.alpha = 0
+}) { f in
+self.myView.removeFromSuperView()
+}
+当上下文明朗的，单一表达式闭包用隐式返回
+attendeeList.sort { a,b in
+a > b
+}
+##类型
+当可用时，总是使用swift本地类型。swift提供桥接到objective-C-因此你可用使用所有系列的方法
+eg首选
+let width = 120.0
+let widthString = (width as NSNumber).stringValue
+eg-糟糕的书写方式
+let width：NSNumber = 120.0
+let widthString :NSString = width.stringValue
+在sprite kit代码中如果通过避免过多的转换来使代码更加简洁，用CGFloat
+#constants常量
+常量使用let关键字定义，变量则用var关键字去定义。如果变量的值将不做更改，用let代替var
+
+如果编译器抱怨，定义任何事物用let，仅仅更改它为var。编译器会给你tip。
+##可选值
+当一个空值是可以被接收的，声明变量和函数返回值类型为可选值，对于实例变量（你知道的在使用前必须初始化）隐式强制解包用！例如在viewDidLoad中将被安装的子视图。
+如果这个值仅仅存取一次或是在链中有多个可选值时，当你存取一个可选值时，使用可选链
+例如
+self.textContainer?.textLabel?.setNeedDisplay()
+当解包一次或执行多重的操作时使用可选绑定更加方便
+eg
+if let textContainer = self.textContainer {
+//do many things with textContainer
+}
+当命名可选变量或属性时，当他们的可选类型已经在类型中声明时避免这样的命名例如 optionalString,maybeView
+-明智的选择
+var subview:UIView?
+var volume:Double?
+var name:String?
+//
+if let subview = subview,volume = volume,name = name {
+//do something with unwrapped subview ,volume and name
+}
+糟糕的命名
+var optionalSubview:UIView?
+var volume:Double?
+if let unwrappedSubview = optionalSubview {
+if let realVolume = volume {
+//do something with unwrappedSubview and realVolume
+}
+}
+#结构初始化器
+最好使用本地的swift结构初始化器去代替原有的初始化器
+
+明智的选择
+let bounds = CGRect(x:40,y:40,width:100,height:80)
+let centerPoint = CGPoint(x:97,y:87)
+糟糕的使用
+let bounds = CGRectMake(40,20,30,45)
+let centerPoint = CGPointMake(97,87)
+#类型推断
+参考紧凑的代码,让编译器推断的类型常量或变量,除非你需要一个特定类型的默认 .例如，CGFloat，Int16
+首要的选择规范
+let message = “Click the button”
+let currentBounds = computerViewBounds()
+var names = [String]()
+let maximumWidth:CGFloat = 106.5
+ 糟糕的书写规范
+let message :String = “Click the button”
+let currentBounds :CGRect = computerViewBounds()
+var names:[String] =[]
+备注：下面这条指导原则意味着选择描述性的名字比以前更加重要。
+#语法糖
+喜欢快捷版本完整的泛型类型声明的语法。
+eg：
+var deviceModels:[String]
+var employees:[Int:String]
+var faxNumber:Int?
+糟糕的书写规范
+var deviceModels:Array<String>
+var employees:Dictionary<Int,String>
+var faxNumber:Optional<Int>
+#控制流
+使用for-in代替for循环
+首选的书写规范
+for _ in 0..<3 {
+print(“Hello,three times”)
+}
+for (index,person) in attendeeList.enumerate() {
+print(“\(person) is at position  \(index)”)
+}
+糟糕的书写规范
+for var i = 0;i < 3;i++ {
+print(“hello,three times”)
+}
+for var i = 0;i < attendeeList.count;i++ {
+let person = attendeeList[i]
+print(“\(person) is at position \(i)”)
+}
+#分号
+在你的代码中每一个陈述句后swift不要求分号，如果你希望在单行上结合多长陈述句，要加分号
+不要在分号分开的单行写多重陈述句
+唯一的例外是“for-conditional-increment”构造,这就需要分号。然而,选择“for-in”结构应该在可能的情况下使用。
+首选的代码书写方式
+let swift = “not a scripting language”
+糟糕的书写方式
+let swift = “not a scripting language”;
+备注：
+swift不同于JavaScript，在省略分号（通常被认为不安全）
+#语言
+用美式英语拼写去匹配苹果API
+首选的书写方式
+let  color = “red”
+不建议采用的书写规范
+let colour = “red”
